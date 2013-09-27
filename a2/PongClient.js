@@ -25,7 +25,7 @@ function PongClient() {
     var delay;          // delay simulated on current client 
     var prevVx = 0;     // previous velocity (for accelorometer
 
-    var updateInterval = 1000/Pong.FRAME_RATE; // period to send update on the position to the server
+    var updateInterval = 200; // period to send update on the position to the server
     var lastMouseX = 0;
     var lastMouseY = 0;
     var mouseSpeed = '';
@@ -35,7 +35,7 @@ function PongClient() {
     var s_lastY = 0;
     var s_predictedX = 0;
     var s_predictedY = 0;
-    var errorThreshold = Paddle.WIDTH/10;
+    var errorThreshold = Paddle.WIDTH/8;
     var vChanged = 0;
 
     var updated = 0;
@@ -105,10 +105,10 @@ function PongClient() {
                     appendMessage("serverMsg", message.content);
                     break;
                 case "update": 
-                    sBall.x = message.ballX;
-                    sBall.y = message.ballY;
-                    sBall.vx = message.ballVelX;
-                    sBall.vy = message.ballVelY;
+                    ball.x = message.ballX;
+                    ball.y = message.ballY;
+                    ball.vx = message.ballVelX;
+                    ball.vy = message.ballVelY;
                     topPaddleX = message.topPaddleX;
                     bottomPaddleX = message.bottomPaddleX;
                     //myPaddle.x = message.myPaddleX;
@@ -116,25 +116,25 @@ function PongClient() {
                     opponentPaddle.x = message.opponentPaddleX;
                     opponentPaddle.y = message.opponentPaddleY;
 
-                    if (!ball.x) { 
-                        ball.lastUpdate = sBall.lastUpdate;
-                        ball.moving = sBall.moving;
-                        ball.x = sBall.x;
-                        ball.y = sBall.y;
-                        ball.vx = sBall.vx;
-                        ball.vy = sBall.vy;
-                    }
+                    // if (!ball.x) { 
+                    //     ball.lastUpdate = sBall.lastUpdate;
+                    //     ball.moving = sBall.moving;
+                    //     ball.x = sBall.x;
+                    //     ball.y = sBall.y;
+                    //     ball.vx = sBall.vx;
+                    //     ball.vy = sBall.vy;
+                    // }
 
-                    console.log(message);
-                    //console.log (ball.vx + " - " + sBall.vy);
-                    if (ball.vx != sBall.vx) {
-                        ball.lastUpdate = sBall.lastUpdate;
-                        ball.moving = sBall.moving;
-                        ball.x = sBall.x;
-                        ball.y = sBall.y;
-                        ball.vx = sBall.vx;
-                        ball.vy = sBall.vy;
-                    }
+                    // console.log(message);
+                    // //console.log (ball.vx + " - " + sBall.vy);
+                    // if (ball.vx != sBall.vx) {
+                    //     ball.lastUpdate = sBall.lastUpdate;
+                    //     ball.moving = sBall.moving;
+                    //     ball.x = sBall.x;
+                    //     ball.y = sBall.y;
+                    //     ball.vx = sBall.vx;
+                    //     ball.vy = sBall.vy;
+                    // }
                     break;
                 default: 
                     appendMessage("serverMsg", "unhandled meesage type " + message.type);
@@ -258,9 +258,10 @@ function PongClient() {
         // exceed error threshold
         if (checkPredictedPos(currentX) || checkMouseSpeed()) {
             updated++;
-            //console.log(updated/total_count);
+            console.log(updated/total_count);
             s_lastX = currentX;
             s_mouseSpeed = mouseSpeed;
+            lastMouseSpeed = mouseSpeed;
             sendToServer({type:"move", x: currentX, mouseSpeed: mouseSpeed});
         }
     }
@@ -278,17 +279,10 @@ function PongClient() {
 
     var checkMouseSpeed = function () {
         if (lastMouseSpeed != mouseSpeed) {
-            lastMouseSpeed = mouseSpeed;
             return true;
         } else {
             return false;
         }
-    }
-
-    var updateBallPos = function () {
-        //console.log(ball);
-        ball.clientMoveOneStep(topPaddleX, bottomPaddleX);
-        //console.log(ball);
     }
 
     /*
@@ -384,8 +378,6 @@ function PongClient() {
      * equals to the frame rate.
      */
     var render = function() {
-        needUpdateServer();
-        updateBallPos();
         // Get context
         var context = playArea.getContext("2d");
 
@@ -443,6 +435,7 @@ function PongClient() {
 
         // Start drawing 
         setInterval(function() {render();}, 1000/Pong.FRAME_RATE);
+        setInterval(function() {needUpdateServer();}, updateInterval);
     }
 }
 
