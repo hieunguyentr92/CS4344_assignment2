@@ -18,6 +18,7 @@ function Paddle(yPos){
 	// Public variables
 	this.x;		// x-coordinate of paddle's position 
 	this.y;		// y-coordinate of paddle's position
+	this.speed;
     this.vx;    // x-velocity of the paddle
 
 	// Constructor
@@ -25,6 +26,7 @@ function Paddle(yPos){
 	this.x = Pong.WIDTH/2;
 	this.y = yPos - Paddle.HEIGHT/2;
     this.vx = 0; // scaling factor is 10
+	this.speed = 0;
 }
 
 // Static variables
@@ -47,6 +49,12 @@ Paddle.prototype.move = function(newx) {
 		this.x = Pong.WIDTH - Paddle.WIDTH/2;
 	else
 		this.x = newx;
+}
+
+Paddle.prototype.predicted_move = function(interval) {
+	var predictedX = this.x + this.speed*interval;
+	this.move(predictedX);
+	//process.stdout.write(this.speed + " - " + predictedX + "\n");
 }
 
 /*

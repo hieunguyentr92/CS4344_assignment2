@@ -31,6 +31,8 @@ function PongServer() {
     var players;      // Associative array for players, indexed via socket ID
     var p1, p2;       // Player 1 and 2.
 
+    var serverDelay = 200;
+    var interval = 1000/Pong.FRAME_RATE;
     /*
      * private method: broadcast(msg)
      *
@@ -119,16 +121,26 @@ function PongServer() {
             p1.paddle.moveOneStep();
             p2.paddle.moveOneStep();
 
+            p1.paddle.predicted_move(interval);
+            p2.paddle.predicted_move(interval);
+
             // Move ball
             ball.moveOneStep(p1.paddle, p2.paddle);
 
             // Update on player side
+            //process.stdout.write(ball.vx + " - " + ball.vy + "\n");
             var bx = ball.x;
             var by = ball.y;
+            var bxVel = ball.vx;
+            var byVel = ball.vy;
             var states = { 
                 type: "update",
                 ballX: bx,
                 ballY: by,
+                ballVelX: bxVel,
+                ballVelY: byVel, 
+                topPaddleX: p1.paddle.x,
+                bottomPaddleX: p2.paddle.x,
                 myPaddleX: p1.paddle.x,
                 myPaddleY: p1.paddle.y,
                 opponentPaddleX: p2.paddle.x,
@@ -138,6 +150,10 @@ function PongServer() {
                 type: "update",
                 ballX: bx,
                 ballY: by,
+                ballVelX: bxVel,
+                ballVelY: byVel,
+                topPaddleX: p1.paddle.x,
+                bottomPaddleX: p2.paddle.x,
                 myPaddleX: p2.paddle.x,
                 myPaddleY: p2.paddle.y,
                 opponentPaddleX: p1.paddle.x,
@@ -246,6 +262,7 @@ function PongServer() {
                         case "move":
                             setTimeout(function() {
                                 players[conn.id].paddle.move(message.x);
+                                players[conn.id].paddle.speed = message.mouseSpeed || 0;
                             },
                             players[conn.id].getDelay());
                             break;

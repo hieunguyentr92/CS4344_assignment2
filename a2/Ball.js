@@ -118,6 +118,37 @@ function Ball() {
 		}
 	}
 
+	// For client rendering the animation of the ball
+	this.clientMoveOneStep = function(topPaddleX, bottomPaddleX) {
+		var now = getTimestamp(); // get the current time in millisecond resolution
+		
+		// Update position
+		that.x += vx*(now - lastUpdate)*Pong.FRAME_RATE/1000;
+		that.y += vy*(now - lastUpdate)*Pong.FRAME_RATE/1000;
+
+		lastUpdate = now;
+
+		//console.log(this.x + " - " + this.y + " - " + this.vx + " - " + this.vy);
+		// Check for bouncing
+		if (that.x <= Ball.WIDTH/2 || that.x >= Pong.WIDTH - Ball.WIDTH/2) {
+			// Bounds off horizontally
+			vx = -vx;
+		} else if (that.y + Ball.HEIGHT/2 > Pong.HEIGHT || that.y - Ball.HEIGHT/2 < 0) {
+			// Goes out of bound! Lose point and restart.
+			that.x = Pong.WIDTH/2;
+			that.y = Pong.HEIGHT/2;
+			vx = 0;
+			vy = 0;
+			moving = false;
+		} else if (that.y - Ball.HEIGHT/2 < Paddle.HEIGHT) {
+			// Chance for ball to collide with top paddle.
+			//updateVelocity(topPaddleX);
+		} else if (that.y + Ball.HEIGHT/2 > Pong.HEIGHT - Paddle.HEIGHT) {
+			// Chance for ball to collide with bottom paddle.
+			//updateVelocity(bottomPaddleX);
+		}
+	}
+
 	// the following snippet defines an appropriate high resolution 
 	// getTimestamp function depends on platform.
 	if (typeof window === "undefined") {
