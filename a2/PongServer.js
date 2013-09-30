@@ -131,10 +131,12 @@ function PongServer() {
             //process.stdout.write(ball.vx + " - " + ball.vy + "\n");
             var bx = ball.x;
             var by = ball.y;
-            var bxVel = ball.vx;
-            var byVel = ball.vy;
+            var bxVel = ball.pbvx;
+            var byVel = ball.pbvy;
+            var ballMoving = ball.isMoving();
             var states = { 
                 type: "update",
+                ballMoving: ballMoving,
                 ballX: bx,
                 ballY: by,
                 ballVelX: bxVel,
@@ -148,6 +150,7 @@ function PongServer() {
             setTimeout(unicast, p1.getDelay(), sockets[1], states);
             states = { 
                 type: "update",
+                ballMoving: ballMoving,
                 ballX: bx,
                 ballY: by,
                 ballVelX: bxVel,

@@ -41,11 +41,12 @@ function PongClient() {
     var updated = 0;
     var total_count = 0;
 
-    var sBall;
+    var clientBall;
     var ballVelX = 0;
     var ballVelY = 0;
     var topPaddleX;
     var bottomPaddleX;
+    var ballMoving = 0;
 
     /*
      * private method: showMessage(location, msg)
@@ -115,7 +116,31 @@ function PongClient() {
                     myPaddle.y = message.myPaddleY;
                     opponentPaddle.x = message.opponentPaddleX;
                     opponentPaddle.y = message.opponentPaddleY;
+                    ballMoving = message.ballMoving;
+            
+                    //clientBall.x = message.ballX;
+                    //clientBall.y = message.ballY;
+                    if (clientBall.pbvx != message.ballVelX || clientBall.pbvy != message.ballVelY) {
+                        clientBall.setVx(message.ballVelX);
+                        clientBall.setVy(message.ballVelY);
+                        clientBall.x = message.ballX;
+                        clientBall.y = message.ballY;
+                    }
 
+                    if (!clientBall.x) {
+                        clientBall.setVx(message.ballVelX);
+                        clientBall.x = message.ballX;
+                    }
+
+                    if (!clientBall.y) {
+                        clientBall.setVy(message.ballVelY);
+                        clientBall.y = message.ballY;
+                    }
+
+
+                    //console.log(message);                    
+                    //console.log(clientBall);
+                    //console.log(message);
                     // if (!ball.x) { 
                     //     ball.lastUpdate = sBall.lastUpdate;
                     //     ball.moving = sBall.moving;
@@ -136,6 +161,7 @@ function PongClient() {
                     //     ball.vy = sBall.vy;
                     // }
                     break;
+                    
                 default: 
                     appendMessage("serverMsg", "unhandled meesage type " + message.type);
                 }
@@ -258,7 +284,7 @@ function PongClient() {
         // exceed error threshold
         if (checkPredictedPos(currentX) || checkMouseSpeed()) {
             updated++;
-            console.log(updated/total_count);
+            //console.log(updated/total_count);
             s_lastX = currentX;
             s_mouseSpeed = mouseSpeed;
             lastMouseSpeed = mouseSpeed;
@@ -293,9 +319,10 @@ function PongClient() {
      * the ball is moving).
      */
     var onMouseClick = function(e) {
-        if (!ball.isMoving()) {
+        if (!ballMoving) {
             //Send event to server
             sendToServer({type:"start"});
+            clientBall.startMoving();
         }
     }
 
@@ -388,10 +415,13 @@ function PongClient() {
         context.fillStyle = "#000000";
         context.fillRect(0, 0, playArea.width, playArea.height);
 
+        clientBall.moveOneStep(topPaddleX, bottomPaddleX);
+        //console.log(clientBall);
         // Draw the ball
         context.fillStyle = "#ffffff";
         context.beginPath();
-        context.arc(ball.x, ball.y, Ball.WIDTH/2, 0, Math.PI*2, true);
+        //context.arc(ball.x, ball.y, Ball.WIDTH/2, 0, Math.PI*2, true);
+        context.arc(clientBall.x, clientBall.y, Ball.WIDTH/2, 0, Math.PI*2, true);
         context.closePath();
         context.fill();
 
@@ -417,7 +447,9 @@ function PongClient() {
         ball = new Ball();
 
         // ball is used to rendered locally, sBall is the actual ball from server
-        sBall = new Ball();
+        clientBall = new ClientBall();
+        clientBall.x = Pong.WIDTH/2;
+        clientBall.y = Pong.HEIGHT/2;
 
         // The following lines always put the player's paddle
         // at the bottom; opponent's paddle at the top.

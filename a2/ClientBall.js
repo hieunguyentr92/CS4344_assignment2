@@ -15,7 +15,7 @@
 // enforce strict/clean programming
 "use strict"; 
 
-function Ball() {
+function ClientBall() {
     // Private variables
 	var moving;	// boolean of whether ball is moving
 	var vx;		// x-component of ball's velocity
@@ -37,6 +37,16 @@ function Ball() {
 	vy = 0;
 	this.x = Pong.WIDTH/2;
 	this.y = Pong.HEIGHT/2;
+
+	this.setVx = function (newVx) {
+		vx = newVx;
+		this.pbvx = vx;
+	}
+
+	this.setVy = function (newVy) {
+		vy = newVy;
+		this.pbvy = vy;
+	}
 
     /*
      * private method: updateVelocity(px)
@@ -62,8 +72,6 @@ function Ball() {
             vy = -vy;
         }
         // else = ball didn't collide with paddle
-        that.pbvx = vx;
-        that.pbvy = vy;
 	}
 
     /*
@@ -75,9 +83,7 @@ function Ball() {
 	this.startMoving = function(){
 		vx = 0;
 		vy = Ball.VERTICAL_VELOCITY;
-		that.pbvx = vx;
-		that.pbvy = vy;
-		moving = true;
+		//moving = true;
 		lastUpdate = getTimestamp();
 	}
 	  
@@ -112,13 +118,11 @@ function Ball() {
 			vx = -vx;
 		} else if (that.y + Ball.HEIGHT/2 > Pong.HEIGHT || that.y - Ball.HEIGHT/2 < 0) {
 			// Goes out of bound! Lose point and restart.
-			that.x = Pong.WIDTH/2;
-			that.y = Pong.HEIGHT/2;
-			vx = 0;
-			vy = 0;
-			that.pbvx = 0;
-			that.pbvy = 0;
-			moving = false;
+			// that.x = Pong.WIDTH/2;
+			// that.y = Pong.HEIGHT/2;
+			// vx = 0;
+			// vy = 0;
+			//moving = false;
 		} else if (that.y - Ball.HEIGHT/2 < Paddle.HEIGHT) {
 			// Chance for ball to collide with top paddle.
 			updateVelocity(topPaddle.x);
